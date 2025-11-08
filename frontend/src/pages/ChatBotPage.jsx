@@ -381,7 +381,7 @@ const ChatBotPage = () => {
                   onChange={handleExamStageChange}
                   className="input-selector"
                 >
-                  <option value="">-- Exam Stage --</option>
+                  <option value="">Exam Stage</option>
                   <option value="Foundation">Foundation</option>
                   <option value="Intermediate">Intermediate</option>
                   <option value="Final">Final</option>
@@ -393,7 +393,7 @@ const ChatBotPage = () => {
                   disabled={!selectedExamStage}
                   className="input-selector"
                 >
-                  <option value="">-- Subject --</option>
+                  <option value="">Subject</option>
                   {selectedExamStage === 'Foundation' ? (
                     <>
                       <option value="Accounting">Accounting</option>
