@@ -82,9 +82,9 @@ Generate ${count} new, unique MCQs suitable for the CA ${examStage} level, focus
 
 **Contextual Learning from Examples:**
 When example questions are provided below, analyze them carefully. Pay attention to:
-*   The style, tone, and complexity of the questions.
-*   The structure, especially how main questions and potential sub-questions are handled.
-*   The nature of explanations and how distractors are designed.
+* The style, tone, and complexity of the questions.
+* The structure, especially how main questions and potential sub-questions are handled.
+* The nature of explanations and how distractors are designed.
 Use these examples to refine the quality and relevance of the questions you generate.
 
 `;
@@ -174,9 +174,11 @@ Use these examples to refine the quality and relevance of the questions you gene
     // 4. Call Google Gemini API
     console.log("Sending prompt to Google Gemini API...");
     console.log("Prompt length:", prompt.length, "characters");
-    console.log("Prompt:", prompt); // Uncomment for debugging
+    // console.log("Prompt:", prompt); // Uncomment for debugging
 
     try {
+      // NOTE: Using 'gemini-3-flash-preview' as requested.
+      // If you hit Rate Limits, switch this to 'gemini-2.5-flash'
       const model = genAI.getGenerativeModel({ 
         model: "gemini-3-flash-preview", 
         safetySettings 
@@ -200,7 +202,7 @@ Use these examples to refine the quality and relevance of the questions you gene
       if (result && result.response) {
         const rawContent = result.response.text();
         console.log("Raw Content length:", rawContent.length, "characters");
-        console.log("Raw Content from AI:", rawContent);
+        // console.log("Raw Content from AI:", rawContent);
 
         // Attempt to parse the content as JSON
         try {
@@ -279,7 +281,7 @@ Use these examples to refine the quality and relevance of the questions you gene
 
         } catch (parseError) {
           console.error("Failed to parse AI response JSON:", parseError);
-          console.error("First 200 chars of raw content:", rawContent.substring(0, 200));
+          // console.error("First 200 chars of raw content:", rawContent.substring(0, 200));
           return res.status(500).json({ 
             error: 'Failed to parse AI response.', 
             details: parseError.message,
@@ -367,10 +369,13 @@ router.post('/ask', async (req, res) => {
     7.  **Formatting:** Use plain text only. Do NOT use markdown formatting (like *, _, \`, #).`;
 
     try {
-      // Initialize the model
+      // Initialize the model with SYSTEM INSTRUCTIONS
+      // NOTE: Using 'gemini-3-flash-preview' as requested.
+      // If you encounter a 404 or 429 error, fallback to 'gemini-2.5-flash'
       const model = genAI.getGenerativeModel({ 
         model: "gemini-3-flash-preview", 
-        safetySettings 
+        safetySettings,
+        systemInstruction: systemPrompt // <--- KEY FIX: Native System Instruction
       });
       
       const generationConfig = {
@@ -381,28 +386,11 @@ router.post('/ask', async (req, res) => {
       console.log("Setting up chat with Gemini...");
       
       // Convert conversation history to Gemini's chat format
-      const chatHistory = [];
-      
-      // Add system prompt as first message if there's no history yet
-      if (conversationHistory.length === 0) {
-        chatHistory.push({
-          role: "user",
-          parts: [{ text: "System instructions: " + systemPrompt }]
-        });
-        
-        chatHistory.push({
-          role: "model",
-          parts: [{ text: "I understand. I'll act as a Chartered Accountancy expert assistant, following all the guidelines you've provided." }]
-        });
-      } else {
-        // Convert existing chat history to Gemini's format
-        conversationHistory.forEach(msg => {
-          chatHistory.push({
-            role: msg.type === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.content }]
-          });
-        });
-      }
+      // NOTE: We no longer need to manually inject the system prompt here
+      const chatHistory = conversationHistory.map(msg => ({
+        role: msg.type === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+      }));
       
       // Create a chat session with history
       const chat = model.startChat({
