@@ -178,11 +178,11 @@ Use these examples to refine the quality and relevance of the questions you gene
 
     try {
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-3-pro", 
+        model: "gemini-3-pro-preview", 
         safetySettings 
       });
       
-      console.log("Using model: gemini-3-pro");
+      console.log("Using model: gemini-3-pro-preview");
 
       const generationConfig = {
         temperature: 0.7,
@@ -369,7 +369,7 @@ router.post('/ask', async (req, res) => {
     try {
       // Initialize the model
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-3-pro", 
+        model: "gemini-3-pro-preview", 
         safetySettings 
       });
       
